@@ -9,10 +9,13 @@ import { userroute } from "./route/user.route.js";
 import cookieParser from "cookie-parser";
 const app = express();
 app.use(express.json());
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    origin:"https://article-vercel-frontend.vercel.app",
+    origin: [
+      "http://localhost:5173",
+      "https://article-vercel-frontend.vercel.app",
+    ],
     credentials: true,
   })
 );

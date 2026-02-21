@@ -64,7 +64,7 @@ const generaterefreshtoken = (user) => {
     {
       id: user.id,
     },
-    process.env.refreshtoken,
+    process.env.REFRESHTOKEN,
     { expiresIn: "7h" },
   );
 };
@@ -113,14 +113,12 @@ export const logout = async (req, res) => {
     userdata.refreshtoken = null;
     await userdata.save();
 
-
-
     res.clearCookie("refreshtoken", {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-  path: "/"
-});
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    });
     res.status(200).json({ sucess: true, msg: "loggout sucessfully" });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
