@@ -56,7 +56,7 @@ const generateAccessToken = (user) => {
       name: user.name,
     },
     process.env.ACCESSTOKEN,
-    { expiresIn: "1h" }
+    { expiresIn: "1h" },
   );
 };
 const generaterefreshtoken = (user) => {
@@ -65,7 +65,7 @@ const generaterefreshtoken = (user) => {
       id: user.id,
     },
     process.env.refreshtoken,
-    { expiresIn: "7h" }
+    { expiresIn: "7h" },
   );
 };
 export const login = async (req, res) => {
@@ -85,39 +85,44 @@ export const login = async (req, res) => {
     const refreshtoken = generaterefreshtoken(userdata);
     userdata.refreshtoken = refreshtoken;
     await userdata.save();
+
     res.cookie("refreshtoken", refreshtoken, {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
+      path: "/",
     });
-    res
-      .status(200)
-      .json({
-        success: true,
-        userid: userdata._id,
-        name: userdata.name,
-        role: userdata.role,
-        token: Accesstoken
-      });
-
+    res.status(200).json({
+      success: true,
+      userid: userdata._id,
+      name: userdata.name,
+      role: userdata.role,
+      token: Accesstoken,
+    });
   } catch (error) {
-     return res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
-export const logout=async(req,res)=>{
-    try {
-            const refreshtoken=req.cookies.refreshtoken;
-    if(!refreshtoken){
-        return res.status(404).json({success:false,msg:"token is missing"})
+export const logout = async (req, res) => {
+  try {
+    const refreshtoken = req.cookies.refreshtoken;
+    if (!refreshtoken) {
+      return res.status(404).json({ success: false, msg: "token is missing" });
     }
-    const userdata=await user.findOne({refreshtoken});
-    userdata.refreshtoken=null
+    const userdata = await user.findOne({ refreshtoken });
+    userdata.refreshtoken = null;
     await userdata.save();
-     res.clearCookie("refreshtoken");
-    res.status(200).json({ sucess: true, msg: "loggout sucessfully" });
-    } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
-        
-    }
 
-}
+
+
+    res.clearCookie("refreshtoken", {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  path: "/"
+});
+    res.status(200).json({ sucess: true, msg: "loggout sucessfully" });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
